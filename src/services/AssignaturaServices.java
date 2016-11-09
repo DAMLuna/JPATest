@@ -7,6 +7,7 @@ package services;
 
 import java.util.List;
 import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import jpatest.Alumne;
@@ -22,6 +23,41 @@ public class AssignaturaServices {
 
     public AssignaturaServices(EntityManager em) {
         this.em = em;
+    }
+
+    public void removeAlumne(int id) {
+        Assignatura emp = findAssignatura(id);
+        if (emp != null) {
+            em.remove(emp);
+        }
+    }
+
+    public void addAssignatura(Integer i, String nom) {
+        Assignatura a = new Assignatura();
+        EntityTransaction tx = em.getTransaction();       
+        a.setCodi(i);
+        a.setNom(nom);
+//        a.setTutoriaList(tutoriaList);
+        try {
+            tx.begin();
+            em.persist(a);
+            tx.commit();
+        } catch (Exception e) {
+            if (tx.isActive()) {
+                tx.rollback();
+            }
+            e.printStackTrace();
+        }
+    }
+
+    public Assignatura findAssignatura(int id) {
+        return em.find(Assignatura.class, id);
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<Assignatura> findAllAssignaturas() {
+        Query query = em.createQuery("SELECT a FROM Assignatura a");
+        return (List<Assignatura>) query.getResultList();
     }
 
     @SuppressWarnings("unchecked")
